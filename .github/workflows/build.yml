@@ -11,5 +11,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: cachix/install-nix-action@v23
-      - run: nix build -L --show-trace .#windows.installer
-      - run: find . -type f -name "*.msi"
+      - run: |
+          nix build -L --show-trace .#windows.installer
+          installer_path=$(find /nix/store -name "flux-screensaver-setup-v1.5.3.exe" | head -n 1)
+          echo "Installer Path: $installer_path"
+          echo "installer_path=${installer_path}" >> $GITHUB_ENV
+      - uses: actions/upload-artifact@v3
+        if: env.installer_path
+        with:
+          name: flux-screensaver-installer
+          path: ${{ env.installer_path }}
