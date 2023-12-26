@@ -11,4 +11,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: cachix/install-nix-action@v23
-      - run: nix build -L --show-trace .#windows.installer
+      - name: Build and upload artifact
+        run: |
+          result_path=$(nix build -L --show-trace .#windows.installer --no-link)
+          echo "The build artifact is located at: $result_path"
+          echo "result_path=${result_path}" >> $GITHUB_ENV
+      - uses: actions/upload-artifact@v3
+        if: env.result_path
+        with:
+          name: windows-installer
+          path: ${{ env.result_path }}
